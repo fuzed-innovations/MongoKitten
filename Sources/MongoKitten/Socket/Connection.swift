@@ -28,7 +28,7 @@ class Connection {
     var authenticating: ManualPromise<Void>?
     
     /// Ran when closing
-    var onClose: (()->())
+    var onClose: (() -> Void)
     
     /// The host that's connected to
     let host: MongoHost
@@ -51,9 +51,9 @@ class Connection {
     }
     
     /// Simply creates a new connection from existing data
-    init(clientSettings: ClientSettings, writable: Bool, host: MongoHost, onClose: @escaping (()->())) throws {
+    init(clientSettings: ClientSettings, writable: Bool, host: MongoHost, onClose: @escaping (() -> Void)) throws {
 
-        var options = [String:Any] ()
+        var options = [String: Any] ()
         if let sslSettings = clientSettings.sslSettings {
             options["sslEnabled"]  = sslSettings.enabled
             options["invalidCertificateAllowed"]  = sslSettings.invalidCertificateAllowed

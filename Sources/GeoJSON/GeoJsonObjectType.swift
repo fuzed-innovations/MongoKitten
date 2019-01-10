@@ -11,7 +11,6 @@
 import Foundation
 import BSON
 
-
 /// Defines a geomeric shape type
 public enum GeoJsonObjectType: String, ValueConvertible {
     /// A single point
@@ -81,6 +80,6 @@ public struct GeometryOperator {
         geometry["$maxDistance"] = self.maxDistance
         geometry["$minDistance"]  = self.minDistance
 
-       return [key: [operatorName:geometry] ]
+       return [key: [operatorName: geometry] ]
     }
 }

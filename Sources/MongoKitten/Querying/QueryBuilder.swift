@@ -12,7 +12,6 @@ import Foundation
 import BSON
 import GeoJSON
 
-
 // MARK: Equations
 
 /// Equals
@@ -276,11 +275,11 @@ public indirect enum AQT {
         case .containsElement(let key, let aqt):
             return [key: ["$elemMatch": aqt.document]]
         case .and(let aqts):
-            let expressions = aqts.map{ $0.document }
+            let expressions = aqts.map { $0.document }
             
             return ["$and": Document(array: expressions) ]
         case .or(let aqts):
-            let expressions = aqts.map{ $0.document }
+            let expressions = aqts.map { $0.document }
             
             return ["$or": Document(array: expressions) ]
         case .not(let aqt):

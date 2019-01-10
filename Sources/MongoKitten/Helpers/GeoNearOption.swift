@@ -69,7 +69,7 @@ public struct GeoNearOptions: ValueConvertible {
 
     /// Creates a Document for these options
     public func makeDocument() -> Document {
-        return ["near":near,
+        return ["near": near,
                 "spherical": spherical,
                 "distanceField": distanceField,
                 "limit": limit,

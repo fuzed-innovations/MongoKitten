@@ -49,7 +49,7 @@ extension Position: Hashable {
     /// Makes a position hashable, thus usable as a key in a dictionary
     public var hashValue: Int {
         // DJB2 Algorithm
-        return self.values.reduce(5381) {
+        return self.values.reduce(5_381) {
             ($0 << 5) &+ $0 &+ $1.hashValue
         }
     }

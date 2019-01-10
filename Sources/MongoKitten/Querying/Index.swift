@@ -138,7 +138,7 @@ public enum IndexParameter {
 //        case .weight(let weight):
 //            return ["weights": Int32(weight)]
         case .geo2dsphere(let field):
-            return ["key":[field:"2dsphere"]]
+            return ["key": [field: "2dsphere"]]
         }
     }
 }

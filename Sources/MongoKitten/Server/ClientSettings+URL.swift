@@ -79,10 +79,10 @@ extension ClientSettings {
 
         let hosts = url.characters.split(separator: ",").map { host -> MongoHost in
             let hostSplit = host.split(separator: ":")
-            var port: UInt16 = 27017
+            var port: UInt16 = 27_017
 
             if hostSplit.count == 2 {
-                port = UInt16(String(hostSplit[1])) ?? 27017
+                port = UInt16(String(hostSplit[1])) ?? 27_017
             }
 
             let hostname = String(hostSplit[0])

@@ -59,7 +59,7 @@ public final class Collection: CollectionQueryable {
     /// The default ReadConcern for this Collection.
     ///
     /// When a ReadConcern is provided in the method call it'll still override this
-    private var defaultReadConcern: ReadConcern? = nil
+    private var defaultReadConcern: ReadConcern?
     
     /// Sets or gets the default read concern at the collection level
     public var readConcern: ReadConcern? {
@@ -74,7 +74,7 @@ public final class Collection: CollectionQueryable {
     /// The default WriteConcern for this Collection.
     ///
     /// When a WriteConcern is provided in the method call it'll still override this
-    private var defaultWriteConcern: WriteConcern? = nil
+    private var defaultWriteConcern: WriteConcern?
     
     /// Sets or gets the default write concern at the collection level
     public var writeConcern: WriteConcern? {
@@ -89,7 +89,7 @@ public final class Collection: CollectionQueryable {
     /// The default Collation for collections in this Server.
     ///
     /// When a Collation is provided in the method call it'll still override this
-    private var defaultCollation: Collation? = nil
+    private var defaultCollation: Collation?
     
     /// Sets or gets the default read concern at the collection level
     public var collation: Collation? {
@@ -550,7 +550,7 @@ public final class Collection: CollectionQueryable {
     ///
     /// - throws: When unable to send the request/receive the response, the authenticated user doesn't have sufficient permissions or an error occurred
     public func createIndexes(_ indexes: [(name: String, parameters: [IndexParameter])]) throws {
-        guard let wireVersion = database.server.serverData?.maxWireVersion , wireVersion >= 2 else {
+        guard let wireVersion = database.server.serverData?.maxWireVersion, wireVersion >= 2 else {
             throw MongoError.unsupportedOperations
         }
         
@@ -567,7 +567,6 @@ public final class Collection: CollectionQueryable {
             
             indexDocs.append(indexDocument)
         }
-        
         
         let document = try firstDocument(in: try database.execute(command: ["createIndexes": self.name, "indexes": Document(array: indexDocs)]))
         
@@ -608,7 +607,7 @@ public final class Collection: CollectionQueryable {
     ///
     /// - returns: A Cursor pointing to the Index results
     public func listIndexes() throws -> Cursor<Document> {
-        guard database.server.buildInfo.version >= Version(3,0,0) else {
+        guard database.server.buildInfo.version >= Version(3, 0, 0) else {
             throw MongoError.unsupportedOperations
         }
         

@@ -9,7 +9,7 @@
 import BSON
 
 /// An error thrown by an `Insert` operation when writing fails
-public struct InsertErrors : Error {
+public struct InsertErrors: Error {
     /// The errors
     public let errors: [InsertError]
     
@@ -41,7 +41,7 @@ public struct InsertErrors : Error {
 }
 
 /// An error thrown by an `Update` operation when writing fails
-public struct UpdateError : Error {
+public struct UpdateError: Error {
     /// The errors
     public let writeErrors: [WriteError]
     
@@ -71,7 +71,7 @@ public struct UpdateError : Error {
 }
 
 /// An error thrown by an `Remove` operation when writing fails
-public struct RemoveError : Error {
+public struct RemoveError: Error {
     /// The list of errors
     public let writeErrors: [WriteError]
     

@@ -97,6 +97,7 @@ extension Database {
         }
 
         do {
+            // swiftlint:disable:next trailing_closure
             return try Cursor(cursorDocument: cursor, collection: self["$cmd"], connection: connection, chunkSize: 100, transform: { $0 })
         } catch {
             self.server.returnConnection(connection)

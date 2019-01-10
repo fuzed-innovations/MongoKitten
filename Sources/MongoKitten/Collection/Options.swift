@@ -9,7 +9,7 @@
 import BSON
 
 /// An option to use for an aggregate operation
-public struct AggregationOptions : ExpressibleByDictionaryLiteral {
+public struct AggregationOptions: ExpressibleByDictionaryLiteral {
     /// The fields to apply to the command document
     public var fields = [String: Primitive]()
     

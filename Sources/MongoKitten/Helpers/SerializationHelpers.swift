@@ -39,7 +39,7 @@ extension Int64 : BSONBytesProtocol {
             Byte((integer >> 32) & 0xFF),
             Byte((integer >> 40) & 0xFF),
             Byte((integer >> 48) & 0xFF),
-            Byte((integer >> 56) & 0xFF),
+            Byte((integer >> 56) & 0xFF)
         ]
     }
 }
@@ -53,7 +53,7 @@ extension Int32 : BSONBytesProtocol {
             Byte(integer & 0xFF),
             Byte((integer >> 8) & 0xFF),
             Byte((integer >> 16) & 0xFF),
-            Byte((integer >> 24) & 0xFF),
+            Byte((integer >> 24) & 0xFF)
         ]
     }
 }
@@ -102,7 +102,7 @@ extension UInt64 : BSONBytesProtocol {
             Byte((integer >> 32) & 0xFF),
             Byte((integer >> 40) & 0xFF),
             Byte((integer >> 48) & 0xFF),
-            Byte((integer >> 56) & 0xFF),
+            Byte((integer >> 56) & 0xFF)
         ]
     }
 }
@@ -116,7 +116,7 @@ extension UInt32 : BSONBytesProtocol {
             Byte(integer & 0xFF),
             Byte((integer >> 8) & 0xFF),
             Byte((integer >> 16) & 0xFF),
-            Byte((integer >> 24) & 0xFF),
+            Byte((integer >> 24) & 0xFF)
         ]
     }
 }

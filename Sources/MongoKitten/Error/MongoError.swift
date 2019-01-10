@@ -12,7 +12,7 @@ import Foundation
 import struct BSON.Document
 
 /// All MongoDB errors
-public enum MongoError : Error {
+public enum MongoError: Error {
     /// Can't create database with name
     case invalidDatabase(String?)
     
@@ -129,7 +129,7 @@ public enum MongoError : Error {
 }
 
 /// Authenication failure
-public enum AuthenticationError : Error {
+public enum AuthenticationError: Error {
     /// Generic error
     case authenticationFailure
     
@@ -180,7 +180,7 @@ public enum AuthenticationError : Error {
 }
 
 /// Internal errors
-internal enum InternalMongoError : Error, CustomDebugStringConvertible {
+internal enum InternalMongoError: Error, CustomDebugStringConvertible {
     /// Invalid message, couldn't be parsed to a Reply
     case incorrectReply(reply: ServerReply)
     

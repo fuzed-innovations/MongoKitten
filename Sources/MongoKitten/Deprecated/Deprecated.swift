@@ -21,7 +21,7 @@ extension Collection {
     /// - throws: When unable to send the request/receive the response, the authenticated user doesn't have sufficient permissions or an error occurred
     @available(*, deprecated: 4.0.5, message: "Index names mustn't be optional")
     public func createIndexes(_ indexes: [(name: String?, parameters: [IndexParameter])]) throws {
-        guard let wireVersion = database.server.serverData?.maxWireVersion , wireVersion >= 2 else {
+        guard let wireVersion = database.server.serverData?.maxWireVersion, wireVersion >= 2 else {
             throw MongoError.unsupportedOperations
         }
         
@@ -38,7 +38,6 @@ extension Collection {
             
             indexDocs.append(indexDocument)
         }
-        
         
         let document = try firstDocument(in: try database.execute(command: ["createIndexes": self.name, "indexes": Document(array: indexDocs)]))
         

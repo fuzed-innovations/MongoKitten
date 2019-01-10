@@ -95,7 +95,7 @@ extension JSONObject {
 }
 
 /// Parses a Regex options String from MongoDB into NSRegularExpression.Options
-fileprivate func regexOptions(fromString s: String) -> NSRegularExpression.Options {
+private func regexOptions(fromString s: String) -> NSRegularExpression.Options {
     var options: NSRegularExpression.Options = []
     
     if s.contains("i") {

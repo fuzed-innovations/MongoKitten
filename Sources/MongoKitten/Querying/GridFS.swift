@@ -106,7 +106,7 @@ public final class GridFS {
             "_id": id,
             "length": dataSize,
             "chunkSize": Int32(chunkSize) as Int32,
-            "uploadDate": Date(timeIntervalSinceNow: 0),
+            "uploadDate": Date(timeIntervalSinceNow: 0)
         ]
         
         if let filename = filename {
@@ -163,7 +163,7 @@ public final class GridFS {
     /// - parameter withType: The optional MIME type to use for this data
     /// - parameter usingMetadata: The optional metadata to store with this file
     /// - parameter inChunksOf: The amount of bytes to put in one chunk
-    public func store(data: Data, named filename: String? = nil, withType contentType: String? = nil, usingMetadata metadata: BSON.Primitive? = nil, inChunksOf chunkSize: Int = 255000) throws -> ObjectId {
+    public func store(data: Data, named filename: String? = nil, withType contentType: String? = nil, usingMetadata metadata: BSON.Primitive? = nil, inChunksOf chunkSize: Int = 255_000) throws -> ObjectId {
         return try self.store(data: Array(data), named: filename, withType: contentType, usingMetadata: metadata, inChunksOf: chunkSize)
     }
     

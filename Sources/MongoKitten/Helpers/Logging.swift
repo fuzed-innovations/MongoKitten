@@ -48,7 +48,7 @@ extension Logger {
 }
 
 /// Doesn't log
-public struct NotLogger : Logger {
+public struct NotLogger: Logger {
     public init() {}
     
     /// Doesn't log
@@ -71,7 +71,7 @@ public struct NotLogger : Logger {
 }
 
 /// Prints all logs
-public struct PrintLogger : Logger {
+public struct PrintLogger: Logger {
     public init() {}
     
     /// Prints a verbose log

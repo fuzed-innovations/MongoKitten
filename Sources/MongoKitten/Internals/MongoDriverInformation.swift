@@ -38,7 +38,7 @@ struct MongoDriverInformation: ValueConvertible {
             client.append(os, forKey: "os")
         }
 
-        if let appName = appName, appName.lengthOfBytes(using: .utf8) < 128 && client.byteCount < 512  {
+        if let appName = appName, appName.lengthOfBytes(using: .utf8) < 128 && client.byteCount < 512 {
             let application: Document = ["name": appName]
             client.append(application, forKey: "application")
         }

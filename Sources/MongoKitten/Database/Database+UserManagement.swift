@@ -29,7 +29,7 @@ extension Database {
     public func createUser(_ user: String, password: String, roles: Document, customData: Document? = nil) throws {
         var command: Document = [
             "createUser": user,
-            "pwd": password,
+            "pwd": password
             ]
 
         if let data = customData {
@@ -67,7 +67,7 @@ extension Database {
     public func update(user username: String, password: String, roles: Document, customData: Document? = nil) throws {
         var command: Document = [
             "updateUser": username,
-            "pwd": password,
+            "pwd": password
             ]
 
         if let data = customData {

@@ -11,7 +11,7 @@
 import BSON
 
 /// Allows embedding custom structures
-internal protocol ValueConvertible : BSON.Primitive {
+internal protocol ValueConvertible: BSON.Primitive {
     func makePrimitive() -> BSON.Primitive
 }
 

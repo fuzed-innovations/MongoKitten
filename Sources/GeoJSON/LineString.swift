@@ -24,7 +24,7 @@ public struct LineString: Geometry, ValueConvertible {
     ///
     /// - Parameter coordinates: at least 2 position.
     /// - Throws: GeoJSONError
-    public init(coordinates: [Position]) throws  {
+    public init(coordinates: [Position]) throws {
         guard coordinates.count < 2 else { throw GeoJSONError.coordinatesMustContainTwoOrMoreElements }
         self.coordinates = coordinates
     }
@@ -34,4 +34,3 @@ public struct LineString: Geometry, ValueConvertible {
         return ["type": self.type, "coordinates": Document(array: self.coordinates) ]
     }
 }
-

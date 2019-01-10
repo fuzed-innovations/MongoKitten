@@ -21,13 +21,13 @@ public struct PolygonCoordinates {
     public let holes: [[Position]]
 
     /// Creates a polygon from it's exterior and holes
-    public init(exterior: [Position], holes:[[Position]]) throws {
+    public init(exterior: [Position], holes: [[Position]]) throws {
 
         guard exterior.count >= 4 else { throw GeoJSONError.ringMustContainFourOrMoreElements }
         guard exterior.first == exterior.last else { throw GeoJSONError.firstAndLastPositionMustBeTheSame }
 
         for hole in holes {
-            guard hole.count >= 4 else  { throw GeoJSONError.ringMustContainFourOrMoreElements }
+            guard hole.count >= 4 else { throw GeoJSONError.ringMustContainFourOrMoreElements }
             guard hole.first == hole.last else { throw GeoJSONError.firstAndLastPositionMustBeTheSame }
         }
 
@@ -36,7 +36,6 @@ public struct PolygonCoordinates {
 
     }
 }
-
 
 extension PolygonCoordinates: ValueConvertible {
     /// Converts this object to an embeddable BSONPrimtive
@@ -50,7 +49,6 @@ extension PolygonCoordinates: ValueConvertible {
         return docs
     }
 }
-
 
 extension PolygonCoordinates: Hashable {
     /// Compares to coordinate sets to be equal
@@ -71,23 +69,22 @@ extension PolygonCoordinates: Hashable {
 
     /// Makes the polygon coordinates hashable
     public var hashValue: Int {
-        var hashVal = 5381
+        var hashVal = 5_381
 
         for hole in self.holes {
-            hashVal = hole.reduce(hashVal){
+            hashVal = hole.reduce(hashVal) {
                 ($0 << 5) &+ $0 &+ $1.hashValue
             }
         }
 
-       hashVal = self.exterior.reduce(hashVal) {
+        hashVal = self.exterior.reduce(hashVal) {
             ($0 << 5) &+ $0 &+ $1.hashValue
+        
         }
 
         return hashVal
     }
 }
-
-
 
 /// A representation of a GeoJSON Polygon.
 public struct Polygon: Geometry {
@@ -98,7 +95,7 @@ public struct Polygon: Geometry {
     public let type: GeoJsonObjectType = .polygon
 
     /// Creates a new polygon
-    public init(exterior:[Position], holes:[Position]...) throws {
+    public init(exterior: [Position], holes: [Position]...) throws {
         self.coordinates = try PolygonCoordinates(exterior: exterior, holes: holes)
     }
 
@@ -107,10 +104,9 @@ public struct Polygon: Geometry {
 extension Polygon: ValueConvertible {
     /// Converts this object to an embeddable BSONPrimtive
     public func makePrimitive() -> BSON.Primitive {
-        return ["type":self.type.rawValue, "coordinates":self.coordinates] as Document
+        return ["type": self.type.rawValue, "coordinates": self.coordinates] as Document
     }
 }
-
 
 extension Polygon: Hashable {
     /// Compares to polygons to be equal

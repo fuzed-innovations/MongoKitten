@@ -20,7 +20,7 @@ public enum CursorStrategy {
     case intelligent(bufferChunks: Int)
 }
 
-fileprivate let cursorMutationsQueue = DispatchQueue(label: "org.mongokitten.server.cursorDataFetchQueue", qos: DispatchQoS.userInteractive)
+private let cursorMutationsQueue = DispatchQueue(label: "org.mongokitten.server.cursorDataFetchQueue", qos: DispatchQoS.userInteractive)
 
 /// A Cursor is a pointer to a sequence/collection of Documents on the MongoDB server.
 ///
@@ -51,9 +51,9 @@ public final class Cursor<T> {
     
     fileprivate var position = 0
     
-    public var strategy: CursorStrategy? = nil
+    public var strategy: CursorStrategy?
     
-    fileprivate var currentFetch: ManualPromise<Void>? = nil
+    fileprivate var currentFetch: ManualPromise<Void>?
     
     /// A closure that transforms a document to another type if possible, otherwise `nil`
     typealias Transformer = (Document) throws -> (T?)
@@ -72,7 +72,7 @@ public final class Cursor<T> {
             throw MongoError.cursorInitializationError(cursorDocument: cursor)
         }
         
-        self.init(namespace: namespace, collection: collection, connection: connection, cursorID: cursorID, initialData: try firstBatch.arrayRepresentation.flatMap{ Document($0) }.flatMap(transform), chunkSize: chunkSize, transform: transform)
+        self.init(namespace: namespace, collection: collection, connection: connection, cursorID: cursorID, initialData: try firstBatch.arrayRepresentation.flatMap { Document($0) }.flatMap(transform), chunkSize: chunkSize, transform: transform)
     }
     
     /// This initializer creates a base cursor from provided specific data

@@ -45,6 +45,7 @@ public final class MongoSocket: MongoTCP {
     
     private let readSource: DispatchSourceRead
     
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     public init(address hostname: String, port: UInt16, options: [String: Any], onRead: @escaping ReadCallback, onError: @escaping ErrorCallback) throws {
         self.sslEnabled = options["sslEnabled"] as? Bool ?? false
         self.onRead = onRead
@@ -77,7 +78,7 @@ public final class MongoSocket: MongoTCP {
         
         switch Int32(addrInfo.pointee.sa_family) {
         case Int32(AF_INET):
-            let addr = UnsafeMutablePointer<sockaddr_in>.init(OpaquePointer(addrInfo))!
+            let addr = UnsafeMutablePointer<sockaddr_in>(OpaquePointer(addrInfo))!
             let specPtr = UnsafeMutablePointer<sockaddr_in>(OpaquePointer(ptr))
             specPtr.assign(from: addr, count: 1)
         case Int32(AF_INET6):
@@ -109,7 +110,6 @@ public final class MongoSocket: MongoTCP {
                 throw Error.cannotConnect
             }
         }
-        
         
         #if (os(macOS) || os(iOS)) && !OPENSSL
             var val = 1
@@ -334,7 +334,7 @@ public final class MongoSocket: MongoTCP {
         self.readSource.resume()
     }
     
-    enum Error : Swift.Error {
+    enum Error: Swift.Error {
         case disconnectedByPeer
         case cannotSendData
         case cannotCreateContext

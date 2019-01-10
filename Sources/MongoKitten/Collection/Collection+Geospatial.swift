@@ -9,7 +9,6 @@
 //
 import Foundation
 
-
 extension Collection {
     /// Returns documents in order of proximity to a specified point, from the nearest to farthest. geoNear requires a geospatial index.
     ///

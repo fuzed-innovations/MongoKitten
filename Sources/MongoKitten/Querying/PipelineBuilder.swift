@@ -142,7 +142,7 @@ public struct AggregationPipeline: ExpressibleByArrayLiteral, ValueConvertible {
         ///
         /// https://docs.mongodb.com/manual/reference/operator/aggregation/group/
         public static func group(_ id: ExpressionRepresentable, computed computedFields: [String: AccumulatedGroupExpression] = [:]) -> Stage {
-            let groupDocument = computedFields.reduce([:]) { (doc, expressionPair) -> Document in
+            let groupDocument = computedFields.reduce([:]) { doc, expressionPair -> Document in
                 guard expressionPair.key != "_id" else {
                     return doc
                 }

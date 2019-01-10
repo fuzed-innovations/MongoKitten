@@ -1,22 +1,22 @@
 import Foundation
 import BSON
 
-fileprivate let objectOpen: UInt8 = 0x7b
-fileprivate let objectClose: UInt8 = 0x7d
+private let objectOpen: UInt8 = 0x7b
+private let objectClose: UInt8 = 0x7d
 
-fileprivate let arrayOpen: UInt8 = 0x5b
-fileprivate let arrayClose: UInt8 = 0x5d
+private let arrayOpen: UInt8 = 0x5b
+private let arrayClose: UInt8 = 0x5d
 
-fileprivate let slash: UInt8 = 0x3f
-fileprivate let colon: UInt8 = 0x3a
-fileprivate let stringQuotationMark: UInt8 = 0x22
+private let slash: UInt8 = 0x3f
+private let colon: UInt8 = 0x3a
+private let stringQuotationMark: UInt8 = 0x22
 
-fileprivate let tab: UInt8 = 0x09
-fileprivate let lineFeed: UInt8 = 0x0a
-fileprivate let carriageReturn: UInt8 = 0x0d
-fileprivate let escape: UInt8 = 0x5c
+private let tab: UInt8 = 0x09
+private let lineFeed: UInt8 = 0x0a
+private let carriageReturn: UInt8 = 0x0d
+private let escape: UInt8 = 0x5c
 
-fileprivate let comma: UInt8 = 0x2c
+private let comma: UInt8 = 0x2c
 
 extension String {
     /// Serializes a Stirng as escaped JSON String
@@ -117,6 +117,7 @@ extension Document {
     ///
     /// - parameters typeSafe: If true integers will be encoded with `{"$numberLong": 123}` for `Int64(123)` and `{"$numberInt": 123}` for `Int32(123)`
     /// - returns: An UTF8 encoded ExtendedJSON `String` from this Document
+    // swiftlint:disable:next function_body_length
     public func makeExtendedJSONData(typeSafe: Bool = false) -> [UInt8] {
         var buffer = [UInt8]()
         buffer.reserveCapacity(self.byteCount)
@@ -135,6 +136,7 @@ extension Document {
             buffer.append(objectClose)
         }
         
+        // swiftlint:disable:next function_body_length
         func append(_ value: Primitive) {
             switch value {
             case let int as Int:

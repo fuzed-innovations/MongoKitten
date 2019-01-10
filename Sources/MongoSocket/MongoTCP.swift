@@ -10,7 +10,7 @@
 
 import Foundation
 
-public enum MongoSocketError:Error {
+public enum MongoSocketError: Error {
     case clientNotInitialized
 }
 
@@ -37,8 +37,8 @@ public final class Buffer {
     }
 }
 
-public typealias ReadCallback = ((UnsafeMutablePointer<UInt8>, Int)->())
-public typealias ErrorCallback = ((Error)->())
+public typealias ReadCallback = ((UnsafeMutablePointer<UInt8>, Int) -> Void)
+public typealias ErrorCallback = ((Error) -> Void)
 
 /// A class buffer that stores all received bytes without Copy-on-Write for efficiency
 public class TCPBuffer {
@@ -49,7 +49,7 @@ public class TCPBuffer {
 }
 
 /// Any socket conforming to this protocol can be used to connect to a server.
-public protocol MongoTCP : class {
+public protocol MongoTCP: class {
     
     /// Opens a socket to the given address at the given port with the given settings
     init(address hostname: String, port: UInt16, options: [String: Any], onRead: @escaping ReadCallback, onError: @escaping ErrorCallback) throws

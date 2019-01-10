@@ -24,12 +24,12 @@ public final class Database {
     /// The default ReadConcern for collections in this Database.
     ///
     /// When a ReadConcern is provided in the method call it'll still override this
-    private var defaultReadConcern: ReadConcern? = nil
+    private var defaultReadConcern: ReadConcern?
     
     /// The default WriteConcern for collections in this Database.
     ///
     /// When a WriteConcern is provided in the method call it'll still override this
-    private var defaultWriteConcern: WriteConcern? = nil
+    private var defaultWriteConcern: WriteConcern?
     
     /// Sets or gets the default write concern at the database level
     public var writeConcern: WriteConcern? {
@@ -56,7 +56,7 @@ public final class Database {
     /// The default Collation for collections in this Database.
     ///
     /// When a Collation is provided in the method call it'll still override this
-    private var defaultCollation: Collation? = nil
+    private var defaultCollation: Collation?
     
     /// Sets or gets the default collation at the database level
     ///

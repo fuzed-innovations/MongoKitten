@@ -25,7 +25,6 @@ import Dispatch
 // This file contains the low level code. This code is synchronous and is used by the async client API. //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 /// A ResponseHandler is a closure that receives a MongoReply to process it
 /// It's internal because ReplyMessages are an internal struct that is used for direct communication with MongoDB only
 internal typealias ResponseHandler = ((Message) -> Void)
@@ -47,9 +46,9 @@ public final class Server {
         }
     }
     
-    public typealias ExplainListener = ((Explaination)->())
+    public typealias ExplainListener = ((Explaination) -> Void)
     
-    public var whenExplaining: ExplainListener? = nil
+    public var whenExplaining: ExplainListener?
     
     /// All servers this library is connecting with
     internal var servers: [MongoHost] {
@@ -62,10 +61,10 @@ public final class Server {
     }
     
     /// Caches the password hash for this server's authentication details
-    internal var cachedLoginData: (password: Bytes, clientKey: Bytes, serverKey: Bytes)? = nil
+    internal var cachedLoginData: (password: Bytes, clientKey: Bytes, serverKey: Bytes)?
     
     /// Handles errors within cursors
-    public var cursorErrorHandler: ((Error)->()) = { doc in
+    public var cursorErrorHandler: ((Error) -> Void) = { doc in
         print(doc)
     }
     
@@ -115,7 +114,7 @@ public final class Server {
     public var readConcern: ReadConcern?
     
     /// The default Collation for collections at the Server level.
-    public var collation: Collation? = nil
+    public var collation: Collation?
     
     /// The default timeout used for connections/queries
     internal var defaultTimeout: TimeInterval = 30
@@ -183,10 +182,10 @@ public final class Server {
             
             var maxMessageSizeBytes = Int32(response.documents.first?["maxMessageSizeBytes"]) ?? 0
             if maxMessageSizeBytes == 0 {
-                maxMessageSizeBytes = 48000000
+                maxMessageSizeBytes = 48_000_000
             }
             
-            self.serverData = (maxWriteBatchSize: Int32(response.documents.first?["maxWriteBatchSize"]) ?? 1000, maxWireVersion: Int32(response.documents.first?["maxWireVersion"]) ?? 4, minWireVersion: Int32(response.documents.first?["minWireVersion"]) ?? 0, maxMessageSizeBytes: maxMessageSizeBytes)
+            self.serverData = (maxWriteBatchSize: Int32(response.documents.first?["maxWriteBatchSize"]) ?? 1_000, maxWireVersion: Int32(response.documents.first?["maxWireVersion"]) ?? 4, minWireVersion: Int32(response.documents.first?["minWireVersion"]) ?? 0, maxMessageSizeBytes: maxMessageSizeBytes)
         }
         
         self.buildInfo = try getBuildInfo()
@@ -217,13 +216,13 @@ public final class Server {
     /// - parameter automatically: Connect automatically
     ///
     /// - throws: When we can’t connect automatically, when the scheme/host is invalid and when we can’t connect automatically
-    convenience public init(hostname host: String, port: UInt16 = 27017, authenticatedAs authentication: MongoCredentials? = nil, maxConnectionsPerServer maxConnections: Int = 100, ssl sslSettings: SSLSettings? = nil) throws {
+    convenience public init(hostname host: String, port: UInt16 = 27_017, authenticatedAs authentication: MongoCredentials? = nil, maxConnectionsPerServer maxConnections: Int = 100, ssl sslSettings: SSLSettings? = nil) throws {
         let clientSettings = ClientSettings(host: MongoHost(hostname:host, port:port), sslSettings: sslSettings, credentials: authentication, maxConnectionsPerServer: maxConnections)
         try self.init(clientSettings)
     }
     
     /// An array maintaining all maintainance tasks
-    var maintainanceLoopCalls = [(()->())]()
+    var maintainanceLoopCalls = [(() -> Void)]()
     
     /// An internal variable that determines whether we're connected to a replica set or sharded cluster
     var isReplica = false
@@ -299,13 +298,13 @@ public final class Server {
                         host.isPrimary = true
                         guard let batchSize = Int32(doc["maxWriteBatchSize"]), let minWireVersion = Int32(doc["minWireVersion"]), let maxWireVersion = Int32(doc["maxWireVersion"]) else {
                             logger.debug("No usable ismaster response found. Assuming defaults.")
-                            serverData = (maxWriteBatchSize: 1000, maxWireVersion: 4, minWireVersion: 0, maxMessageSizeBytes: 48000000)
+                            serverData = (maxWriteBatchSize: 1_000, maxWireVersion: 4, minWireVersion: 0, maxMessageSizeBytes: 48_000_000)
                             break isMasterTest
                         }
                         
                         var maxMessageSizeBytes = Int32(doc["maxMessageSizeBytes"]) ?? 0
                         if maxMessageSizeBytes == 0 {
-                            maxMessageSizeBytes = 48000000
+                            maxMessageSizeBytes = 48_000_000
                         }
                         
                         serverData = (maxWriteBatchSize: batchSize, maxWireVersion: maxWireVersion, minWireVersion: minWireVersion, maxMessageSizeBytes: maxMessageSizeBytes)
@@ -446,7 +445,7 @@ public final class Server {
         
         // If this is a replica server, set up a reconnect
         if self.isReplica {
-            self.maintainanceLoopTasksQueue.sync  {
+            self.maintainanceLoopTasksQueue.sync {
                 self.logger.error("Disconnected from the replica set. Will attempt to reconnect")
                 
                 // If reinitializing is already happening, don't do it more than once
@@ -500,7 +499,7 @@ public final class Server {
         // Find all possible matches to create a connection to
         let matches = self.connections.filter {
             $0.users < self.maxActionsPerConnection && ((!writing && slaveOK) || $0.writable) && $0.isConnected
-            }.sorted(by: { (lhs, rhs) -> Bool in
+            }.sorted(by: { lhs, rhs -> Bool in
                 return lhs.users < rhs.users
             })
         
@@ -658,7 +657,6 @@ public final class Server {
         }
     }
     
-    
     /// Sends a message to the server and waits until the server responded to the request.
     ///
     /// - parameter message: The message we're sending
@@ -751,7 +749,7 @@ public final class Server {
     /// - throws: When unable to send the request/receive the response, the authenticated user doesn't have sufficient permissions or an error occurred
     public func copy(database db: String, to otherDatabase: String, as user: (user: String, nonce: String, password: String)? = nil, at remoteHost: String? = nil, slaveOk: Bool? = nil) throws {
         var command: Document = [
-            "copydb": Int32(1),
+            "copydb": Int32(1)
             ]
         
         if let fromHost = remoteHost {

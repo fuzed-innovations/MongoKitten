@@ -11,7 +11,6 @@
 import Foundation
 import BSON
 
-
 /// A GeoJSon Coordinate Reference System (CRS).
 public struct CoordinateReferenceSystem {
     /// The type of this Coordinate Reference System.
@@ -30,7 +29,7 @@ extension CoordinateReferenceSystem: ValueConvertible {
     }
 }
 
-extension CoordinateReferenceSystem: ExpressibleByStringLiteral{
+extension CoordinateReferenceSystem: ExpressibleByStringLiteral {
     /// Allows instantiation of a CoordinateReferenceSystem with a String
     public init(stringLiteral value: String) {
         self.typeName = value
@@ -46,7 +45,6 @@ extension CoordinateReferenceSystem: ExpressibleByStringLiteral{
         self.typeName = value
     }
 }
-
 
 extension CoordinateReferenceSystem: Hashable {
     /// Compares two CoordinateReferenceSystems

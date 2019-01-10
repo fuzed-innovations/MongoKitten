@@ -54,17 +54,17 @@ enum Message {
         case .Reply:
             return 1
         case .Update:
-            return 2001
+            return 2_001
         case .Insert:
-            return 2002
+            return 2_002
         case .Query:
-            return 2004
+            return 2_004
         case .GetMore:
-            return 2005
+            return 2_005
         case .Delete:
-            return 2006
+            return 2_006
         case .KillCursors:
-            return 2007
+            return 2_007
         }
     }
     
@@ -95,7 +95,7 @@ enum Message {
         let documents = [Document](bsonBytes: data[36..<data.endIndex]*)
         
         // Return the constructed reply
-        return ServerReply(requestID: requestID, responseTo: responseTo, flags: ReplyFlags.init(rawValue: flags), cursorID: cursorID, startingFrom: startingFrom, numbersReturned: numbersReturned, documents: documents)
+        return ServerReply(requestID: requestID, responseTo: responseTo, flags: ReplyFlags(rawValue: flags), cursorID: cursorID, startingFrom: startingFrom, numbersReturned: numbersReturned, documents: documents)
     }
     
     /// Generates BSON From a Message
@@ -503,4 +503,3 @@ struct ServerReply {
     let numbersReturned: Int32
     var documents: [Document]
 }
-

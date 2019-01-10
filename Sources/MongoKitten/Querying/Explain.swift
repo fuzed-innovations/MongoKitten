@@ -263,7 +263,7 @@ public class ExplainedCollection {
     }
     
     public func update(updates: [(filter: Query, to: Document, upserting: Bool, multiple: Bool)], writeConcern: WriteConcern?, ordered: Bool?, timeout: DispatchTimeInterval?) throws -> Explaination {
-        guard database.server.buildInfo.version >= Version(3,0,0) else {
+        guard database.server.buildInfo.version >= Version(3, 0, 0) else {
             throw MongoError.unsupportedFeature("Explain is not available for MongoDB <= 2.6")
         }
         
@@ -285,7 +285,7 @@ public class ExplainedCollection {
             command["ordered"] = ordered
         }
         
-        command["writeConcern"] = writeConcern ??  self.writeConcern
+        command["writeConcern"] = writeConcern ?? self.writeConcern
         
         command = ["explain": command]
         
@@ -299,7 +299,7 @@ public class ExplainedCollection {
     }
     
     public func remove(removals: [(filter: Query, limit: Int)], writeConcern: WriteConcern?, ordered: Bool?, timeout: DispatchTimeInterval?) throws -> Explaination {
-        guard database.server.buildInfo.version >= Version(3,0,0) else {
+        guard database.server.buildInfo.version >= Version(3, 0, 0) else {
             throw MongoError.unsupportedFeature("Explain is not available for MongoDB <= 2.6")
         }
         
@@ -333,7 +333,7 @@ public class ExplainedCollection {
     }
     
     public func find(_ filter: Query? = nil, sortedBy sort: Sort? = nil, projecting projection: Projection? = nil, readConcern: ReadConcern? = nil, collation: Collation? = nil, skipping skip: Int? = nil, limitedTo limit: Int? = nil, withBatchSize batchSize: Int = 100) throws -> Explaination {
-        guard database.server.buildInfo.version >= Version(3,2,0) else {
+        guard database.server.buildInfo.version >= Version(3, 2, 0) else {
             throw MongoError.unsupportedFeature("Explain is not available for MongoDB <= 3.0")
         }
         

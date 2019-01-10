@@ -9,7 +9,6 @@
 //
 import Foundation
 
-
 /// GeoJSON Error
 ///
 /// - positionMustContainTwoOrMoreElements: `Position` must contain at least two elements

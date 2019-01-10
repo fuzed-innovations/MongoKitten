@@ -10,7 +10,7 @@
 
 import BSON
 
-internal protocol ValueConvertible : BSON.Primitive {
+internal protocol ValueConvertible: BSON.Primitive {
     func makePrimitive() -> BSON.Primitive
 }
 

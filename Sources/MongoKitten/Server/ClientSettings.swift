@@ -29,7 +29,7 @@ public struct MongoHost: Equatable, ExpressibleByStringLiteral {
     public internal(set) var isPrimary = false
 
     /// Creates a new Host object that specifies the location of this mongod instance
-    public init(hostname: String, port: UInt16 = 27017) {
+    public init(hostname: String, port: UInt16 = 27_017) {
         self.hostname = hostname
         self.port = port
     }
@@ -40,7 +40,7 @@ public struct MongoHost: Equatable, ExpressibleByStringLiteral {
         let parts = value.characters.reversed().split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
         
         hostname = String(parts[parts.count == 2 ? 1 : 0].reversed())
-        port = parts.count == 2 ? UInt16(String(parts[0].reversed())) ?? 27017 : 27017
+        port = parts.count == 2 ? UInt16(String(parts[0].reversed())) ?? 27_017 : 27_017
     }
     
     /// Creates a new Host object from a string
@@ -49,7 +49,7 @@ public struct MongoHost: Equatable, ExpressibleByStringLiteral {
         let parts = value.characters.reversed().split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
         
         hostname = String(parts[parts.count == 2 ? 1 : 0].reversed())
-        port = parts.count == 2 ? UInt16(String(parts[0].reversed())) ?? 27017 : 27017
+        port = parts.count == 2 ? UInt16(String(parts[0].reversed())) ?? 27_017 : 27_017
     }
     
     /// Creates a new Host object from a string
@@ -58,7 +58,7 @@ public struct MongoHost: Equatable, ExpressibleByStringLiteral {
         let parts = value.characters.reversed().split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
         
         hostname = String(parts[parts.count == 2 ? 1 : 0].reversed())
-        port = parts.count == 2 ? UInt16(String(parts[0].reversed())) ?? 27017 : 27017
+        port = parts.count == 2 ? UInt16(String(parts[0].reversed())) ?? 27_017 : 27_017
     }
     
     /// Compares two hosts to be equal
@@ -164,4 +164,3 @@ public struct ClientSettings {
         self.applicationName = applicationName
     }
 }
-

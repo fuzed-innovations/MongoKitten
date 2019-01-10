@@ -1,5 +1,5 @@
 extension Int32 {
-    internal init<S : Swift.Collection>(_ s: S) where S.Iterator.Element == UInt8, S.Index == Int {
+    internal init<S: Swift.Collection>(_ s: S) where S.Iterator.Element == UInt8, S.Index == Int {
         var val: Int32 = 0
         val |= s.count > 3 ? Int32(s[s.startIndex.advanced(by: 3)]) << 24 : 0
         val |= s.count > 2 ? Int32(s[s.startIndex.advanced(by: 2)]) << 16 : 0
@@ -11,7 +11,7 @@ extension Int32 {
 }
 
 extension Int {
-    internal init<S : Swift.Collection>(_ s: S) where S.Iterator.Element == UInt8, S.Index == Int {
+    internal init<S: Swift.Collection>(_ s: S) where S.Iterator.Element == UInt8, S.Index == Int {
         var number: Int = 0
         number |= s.count > 7 ? Int(s[s.startIndex.advanced(by: 7)]) << 56 : 0
         number |= s.count > 6 ? Int(s[s.startIndex.advanced(by: 6)]) << 48 : 0
@@ -25,4 +25,3 @@ extension Int {
         self = number
     }
 }
-

@@ -154,12 +154,12 @@ extension CollectionQueryable {
         }
         
         while position < documents.count {
-            defer { position += 1000 }
+            defer { position += 1_000 }
             
             if protocolVersion >= 2 {
                 var command: Document = ["insert": self.collectionName]
                 
-                command["documents"] = Document(array: Array(documents[position..<Swift.min(position + 1000, documents.count)]))
+                command["documents"] = Document(array: Array(documents[position..<Swift.min(position + 1_000, documents.count)]))
                 
                 if let ordered = ordered {
                     command["ordered"] = ordered
@@ -190,12 +190,15 @@ extension CollectionQueryable {
                     errors.append(InsertErrors.InsertError(writeErrors: writeErrors))
                 }
                 
+                let errors = throwErrors()
+                if errors.errors.count > 0 { throw errors }
+                
                 guard Int(reply.documents.first?["ok"]) == 1 else {
                     throw throwErrors()
                 }
             } else {
                 
-                let commandDocuments = Array(documents[position..<Swift.min(position + 1000, documents.count)])
+                let commandDocuments = Array(documents[position..<Swift.min(position + 1_000, documents.count)])
                 
                 let insertMsg = Message.Insert(requestID: self.database.server.nextMessageID(), flags: [], collection: self.collection, documents: commandDocuments)
                 _ = try self.database.server.send(message: insertMsg, overConnection: newConnection)
@@ -320,7 +323,7 @@ extension CollectionQueryable {
                 command["ordered"] = ordered
             }
             
-            command["writeConcern"] = writeConcern ??  self.writeConcern
+            command["writeConcern"] = writeConcern ?? self.writeConcern
             
             let reply: ServerReply
             
@@ -476,7 +479,7 @@ extension CollectionQueryable {
                 // If the limit is not '0' and thus removes a set amount of documents. Set it to RemoveOne so we'll remove one document at a time using the older method
                 if removal.limit != 0 {
                     // TODO: Remove this assignment when the standard library is updated.
-                    let _ = flags.insert(DeleteFlags.RemoveOne)
+                    _ = flags.insert(DeleteFlags.RemoveOne)
                 }
                 
                 let message = Message.Delete(requestID: self.database.server.nextMessageID(), collection: self.collection, flags: flags, removeDocument: removal.filter.queryDocument)
@@ -491,7 +494,7 @@ extension CollectionQueryable {
     }
     
     func find(filter: Query?, sort: Sort?, projection: Projection?, readConcern: ReadConcern?, collation: Collation?, skip: Int?, limit: Int?, batchSize: Int = 100, connection: Connection?) throws -> CollectionSlice<Document> {
-        if self.collection.database.server.buildInfo.version >= Version(3,2,0) {
+        if self.collection.database.server.buildInfo.version >= Version(3, 2, 0) {
             var command: Document = [
                 "find": collection.name,
                 "readConcern": readConcern ?? collection.readConcern,
