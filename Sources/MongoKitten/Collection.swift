@@ -62,6 +62,20 @@ public class Collection: FutureConvenienceCallable {
         self.session = database.session
     }
     
+    // MARK: General execution of commands
+    
+    public func execute(command: InsertCommand) -> EventLoopFuture<InsertReply> {
+        return command.execute(on: self)
+    }
+    
+    public func execute(command: UpdateCommand) -> EventLoopFuture<UpdateReply> {
+        return command.execute(on: self)
+    }
+    
+    public func execute(command: DeleteCommand) -> EventLoopFuture<Int> {
+        return command.execute(on: self)
+    }
+    
     // MARK: Reading from a collection
     
     /// Executes a query on the collection.
