@@ -8,13 +8,13 @@
 
 </p>
 
-A fast, pure swift [MongoDB](https://mongodb.com) driver based on [Swift NIO](https://github.com/apple/swift-nio) built for Server Side Swift. It features a great API and a battle-tested core.
+A fast, pure swift [MongoDB](https://mongodb.com) driver based on [Swift NIO](https://github.com/apple/swift-nio) built for Server Side Swift. It features a great API and a battle-tested core. Supporting both MongoDB in server and embedded environments.
 
 ⭐️ Please leave a star to support MongoKitten – it really helps!
 
 # 🕶 Installation
 
-## Set up MongoDB
+## Set up MongoDB server
 
 <details>
 <summary>If you haven't already, you should set up a MongoDB server to get started with MongoKitten</summary>
@@ -23,16 +23,26 @@ For development, this can be on your local machine.
 
 Install MongoDB for [Ubuntu](https://docs.mongodb.com/master/tutorial/install-mongodb-on-ubuntu/), [macOS](https://docs.mongodb.com/master/tutorial/install-mongodb-on-os-x/) or [any other supported Linux Distro](https://docs.mongodb.com/master/administration/install-on-linux/).
 
-Alternatively, make use of a DAAS (Database-as-a-service) like [MongoDB Atlas](https://cloud.mongodb.com), [MLab](https://mlab.com), [Bluemix](https://www.ibm.com/cloud-computing/bluemix/mongodb-hosting) or any other of the many services.
+Alternatively, make use of a DAAS (Database-as-a-service) like [MongoDB Atlas](https://cloud.mongodb.com), [MLab](https://mlab.com), [IBM Cloud](https://cloud.ibm.com/catalog/services/databases-for-mongodb) or any other of the many services.
 </details>
+
+If you're aiming at using MongoKitten Mobile, scroll down!
 
 ## Add MongoKitten to your Swift project 🚀
 
-MongoKitten currently only supports the [Swift Package Manager](https://swift.org/getting-started/#using-the-package-manager). Add MongoKitten to your Package.swift file:
+MongoKitten supports the [Swift Package Manager](https://swift.org/getting-started/#using-the-package-manager) for server-side applications. Add MongoKitten to your dependencies in your **Package.swift** file:
 
 `.package(url: "https://github.com/OpenKitten/MongoKitten.git", from: "5.0.0")`
 
 Also, don't forget to add `"MongoKitten"` as a dependency for your target.
+
+### Mobile [BETA]
+
+MongoKitten now also supports embedded MongoDB databases in beta.
+
+For MongoKitten mobile we rely on [Cocoapods](https://cocoapods.org/). This is not officially supported for using MongoKitten yet, but you can get started by simply add this to your **Podfile**:
+
+`pod 'MongoKitten'`
 
 # 🚲 Basic usage
 
@@ -44,12 +54,54 @@ import MongoKitten
 let db = try Database.synchronousConnect("mongodb://localhost/my_database")
 ```
 
+And for embedded databases:
+
+```swift
+// WARNING: Force unwrap will crash your application on failure
+let mongo = try! MobileDatabase(settings: .default())
+```
+
+## Vapor 3 users should register the database as a service.
+In your `configure.swift`
+```swift
+extension MongoKitten.Database: Service {}
+
+let connectionURI = "mongodb://localhost"
+
+services.register(MongoKitten.Database.self) { container -> MongoKitten.Database in
+    return try MongoKitten.Database.lazyConnect(connectionURI, on: container.eventLoop)
+}
+```
+Now in a route handler you have access to your database like any other service:
+```swift
+struct ServerLanguage: Content {
+   var language: String
+}
+
+func fetchTheBestServerLanguage(_ req: Request) throws -> EventLoopFuture<ServerLanguage> {
+    let db = try req.make(MongoKitten.Database.self)
+	
+    return db["server_languages"].findOne("language" == "swift").map { doucment in
+        guard let theBest = document else {
+            throw Abort(.internalServerError, reason: "Couldn't find the best, Node.JS is your future 🤢")
+	}
+	return try BSONDecoder().decode(ServerLanguage.self, from: theBest)
+    }
+}
+```
+
+### Note on URIs
+
+MongoKitten [does not yet support](https://github.com/OpenKitten/MongoKitten/issues/172#issuecomment-468302085) MongoDB v3.6 connection URIs. You'll need to use the old connection URI format.
+
+If you're unsure; the connection string starting with `mongodb+srv://` is a 3.6 connection URI, whereas URIs starting with `mongodb://` are an older format.
+
 ## NIO Futures
 
 <details>
-<summary>MongoKitten relies on [Swift NIO](https://github.com/apple/swift-nio) to provide support for asynchronous operations. All MongoKitten operations that talk to the server are asynchronous, and return an `EventLoopFuture<...>` of some kind.</summary>
+<summary>MongoKitten relies on Swift NIO to provide support for asynchronous operations. All MongoKitten operations that talk to the server are asynchronous, and return an EventLoopFuture of some kind.</summary>
 
-You can learn all about NIO by reading [its readme](https://github.com/apple/swift-nio/blob/master/README.md), but here are the basics:
+You can learn all about NIO by reading [its readme](https://github.com/apple/swift-nio/blob/master/README.md) or [the article on RayWenderlich.com](https://www.raywenderlich.com/1124580-a-simple-guide-to-async-on-the-server), but here are the basics:
 
 Asynchronous operations return a future. NIO implements futures in the [`EventLoopFuture<T>`](https://apple.github.io/swift-nio/docs/current/NIO/Classes/EventLoopFuture.html) type. An `EventLoopFuture` is a holder for a result that will be provided later. The result of the future can either be successful yielding a result of `T`, or unsuccessful with a result of a Swift `Error`. This is the asynchronous representation of a successful `return` or a thrown error.
 
@@ -94,7 +146,7 @@ To perform the following query in MongoDB:
 Use the following MongoKitten code:
 
 ```swift
-users.findOne("username" == "kitty").whenSuccess { user: Document? in
+users.findOne("username" == "kitty").whenSuccess { (user: Document?) in
 	// Do something with kitty
 }
 ```
@@ -113,7 +165,7 @@ To perform the following query in MongoDB:
 Use the following MongoKitten code:
 
 ```swift
-users.find("age" <= 16 || "age" == nil).forEach { user: Document in
+users.find("age" <= 16 || "age" == nil).forEach { (user: Document) in
 	// Print the user's name
 	print(user["username"] as? String)
 }
@@ -142,7 +194,7 @@ Note that this is potentially dangerous with very large result sets. Only use `g
 For more efficient handling of results, you can lazily iterate over a cursor:
 
 ```swift
-let doneIterating: EventLoopFuture<Void> = users.find().forEach { user: Document in
+let doneIterating: EventLoopFuture<Void> = users.find().forEach { (user: Document) in
 	// ...
 }
 ```
@@ -282,6 +334,12 @@ users.find().decode(User.self).forEach { user in
 ## Support MongoKitten development
 
 [We're accepting donations for our project here](https://opencollective.com/mongokitten). We hope to set up a good test environment as well as many docs, tutorials and examples.
+
+### Backers
+
+<a href="https://opencollective.com/mongokitten/backer/0/website" target="_blank"><img src="https://opencollective.com/mongokitten/backer/0/avatar.svg"></a>
+<a href="twitter.com/DavidSights" target="_blank"><img src="https://opencollective.com/mongokitten/backer/1/avatar.svg"></a>
+
 
 ## Contribute to MongoKitten
 

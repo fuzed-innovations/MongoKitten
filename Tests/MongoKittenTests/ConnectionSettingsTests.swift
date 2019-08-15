@@ -2,7 +2,6 @@ import XCTest
 import MongoKitten
 
 class ConnectionSettingsTests : XCTestCase {
-    
     struct ConnectionStringTest {
         enum Result {
             case throwsError
@@ -18,7 +17,7 @@ class ConnectionSettingsTests : XCTestCase {
         .init(
             string: "mongodb://henk:bar@foo.be:1234/kaas?ssl&sslVerify=false",
             expectedResult: .connectionSettings(
-                .init(authentication: .scramSha1(username: "henk", password: "bar"), hosts: [.init(hostname: "foo.be", port: 1234)], targetDatabase: "kaas", useSSL: true, verifySSLCertificates: false)
+                .init(authentication: .auto(username: "henk", password: "bar"), hosts: [.init(hostname: "foo.be", port: 1234)], targetDatabase: "kaas", useSSL: true, verifySSLCertificates: false)
             ))
     ]
     

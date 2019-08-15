@@ -1,4 +1,5 @@
 import NIO
+import BSON
 
 internal final class Cursor {
     var id: Int64
@@ -6,6 +7,8 @@ internal final class Cursor {
     var drained: Bool {
         return self.id == 0
     }
+    var maxTimeMS: Int?
+    var cancel: (() -> ())?
     let collection: Collection
     
     init(reply: CursorReply, in collection: Collection) {
@@ -25,11 +28,45 @@ internal final class Cursor {
             return collection.eventLoop.newFailedFuture(error: MongoKittenError(.cannotGetMore, reason: .cursorDrained))
         }
         
-        let command = GetMore(cursorId: self.id, batchSize: batchSize, on: collection)
-        return collection.database.session.execute(command: command).map { newCursor in
-            self.id = newCursor.cursor.id
+        var command = GetMore(cursorId: self.id, batchSize: batchSize, on: collection)
+        command.maxTimeMS = self.maxTimeMS
+        
+        return collection.database.session.executeCancellable(command: command).then { cancellableResult in
+            self.cancel = cancellableResult.cancel
             
-            return CursorBatch(batch: newCursor.cursor.nextBatch, isLast: self.drained)
+            return cancellableResult.future.map { newCursor in
+                return CursorBatch(batch: newCursor.cursor.nextBatch, isLast: newCursor.cursor.id == 0)
+            }
+        }
+    }
+    
+    deinit {
+        cancel?()
+    }
+    
+    func drain() -> EventLoopFuture<[Document]> {
+        return CursorDrainer(cursor: self).collectAll()
+    }
+    
+    private final class CursorDrainer {
+        var documents = [Document]()
+        let cursor: Cursor
+        
+        init(cursor: Cursor) {
+            self.documents = cursor.initialBatch ?? []
+            self.cursor = cursor
+        }
+        
+        func collectAll() -> EventLoopFuture<[Document]> {
+            return cursor.getMore(batchSize: 101).then { batch -> EventLoopFuture<[Document]> in
+                self.documents += batch.batch
+                
+                if batch.isLast {
+                    return self.cursor.collection.eventLoop.newSucceededFuture(result: self.documents)
+                }
+                
+                return self.collectAll()
+            }
         }
     }
 }
@@ -160,7 +197,7 @@ extension QueryCursor {
                         var batch = batch
                         
                         guard let element = try batch.nextElement() else {
-                            return self.collection.cluster.eventLoop.newSucceededFuture(result: ())
+                            return self.collection.eventLoop.newSucceededFuture(result: ())
                         }
                         
                         var future = element.map(handler)
@@ -172,12 +209,12 @@ extension QueryCursor {
                         }
                         
                         if batch.isLast {
-                            return self.collection.cluster.eventLoop.newSucceededFuture(result: ())
+                            return self.collection.eventLoop.newSucceededFuture(result: ())
                         }
                         
                         return nextBatch()
                     } catch {
-                        return self.collection.cluster.eventLoop.newFailedFuture(error: error)
+                        return self.collection.eventLoop.newFailedFuture(error: error)
                     }
                 }
             }
@@ -194,6 +231,8 @@ extension QueryCursor {
     /// - returns: A future that resolves when the operation is complete, or fails if an error is thrown
     @discardableResult
     public func forEach(handler: @escaping (Element) throws -> Void) -> EventLoopFuture<Void> {
+        let loop = self.collection.eventLoop
+        
         return execute().then { finalizedCursor in
             func nextBatch() -> EventLoopFuture<Void> {
                 return finalizedCursor.nextBatch().then { batch in
@@ -204,13 +243,13 @@ extension QueryCursor {
                             try handler(element)
                         }
                         
-                        if batch.isLast || finalizedCursor.closed {
-                            return self.collection.cluster.eventLoop.newSucceededFuture(result: ())
+                        if batch.isLast || finalizedCursor.closed || finalizedCursor.cursor.drained {
+                            return loop.newSucceededFuture(result: ())
                         }
                         
                         return nextBatch()
                     } catch {
-                        return self.collection.cluster.eventLoop.newFailedFuture(error: error)
+                        return loop.newFailedFuture(error: error)
                     }
                 }
             }
@@ -221,6 +260,8 @@ extension QueryCursor {
     
     @discardableResult
     public func sequentialForEach(handler: @escaping (Element) throws -> EventLoopFuture<Void>) -> EventLoopFuture<Void> {
+        let loop = self.collection.eventLoop
+        
         return execute().then { finalizedCursor in
             func nextBatch() -> EventLoopFuture<Void> {
                 return finalizedCursor.nextBatch().then { batch in
@@ -229,8 +270,8 @@ extension QueryCursor {
                         
                         func next() throws -> EventLoopFuture<Void> {
                             guard let element = try batch.nextElement(), !finalizedCursor.closed else {
-                                if batch.isLast || finalizedCursor.closed {
-                                    return self.collection.cluster.eventLoop.newSucceededFuture(result: ())
+                                if batch.isLast || finalizedCursor.closed || finalizedCursor.cursor.drained {
+                                    return loop.newSucceededFuture(result: ())
                                 }
                                 
                                 return nextBatch()
@@ -240,14 +281,14 @@ extension QueryCursor {
                                 do {
                                     return try next()
                                 } catch {
-                                    return self.collection.cluster.eventLoop.newFailedFuture(error: error)
+                                    return loop.newFailedFuture(error: error)
                                 }
                             }
                         }
                         
                         return try next()
                     } catch {
-                        return self.collection.cluster.eventLoop.newFailedFuture(error: error)
+                        return loop.newFailedFuture(error: error)
                     }
                 }
             }
@@ -302,7 +343,9 @@ extension QueryCursor {
                 }.cascadeFailure(promise: promise)
             }
             
-            nextBatch()
+            if !finalizedCursor.closed {
+                nextBatch()
+            }
             
             return promise.futureResult
         }
@@ -362,7 +405,13 @@ extension CursorBasedOnOtherCursor {
 public final class FinalizedCursor<Base: QueryCursor> {
     let base: Base
     let cursor: Cursor
-    private(set) var closed = false
+    private(set) var closed = false {
+        didSet {
+            if closed {
+                cursor.id = 0
+            }
+        }
+    }
     
     init(basedOn base: Base, cursor: Cursor) {
         self.base = base
@@ -382,9 +431,10 @@ public final class FinalizedCursor<Base: QueryCursor> {
     /// Closes the cursor stopping any further data from being read
     public func close() -> EventLoopFuture<Void> {
         closed = true
-        
+        self.cursor.id = 0
+        self.cursor.cancel?()
         let command = KillCursorsCommand([self.cursor.id], in: base.collection.namespace)
-        return command.execute(on: self.cursor.collection.session).map { _ in }
+        return command.execute(on: self.cursor.collection).map { _ in }
     }
 }
 

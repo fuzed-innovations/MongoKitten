@@ -1,7 +1,10 @@
 import Foundation
 import BSON
 import NIO
+
+#if canImport(_MongoKittenCrypto)
 import _MongoKittenCrypto
+#endif
 
 /// A SASLStart message initiates a SASL conversation, in our case, used for SCRAM-SHA-xxx authentication.
 struct SASLStart: AdministrativeMongoDBCommand {
@@ -148,7 +151,7 @@ extension Connection {
             
             // NO session must be used here: https://github.com/mongodb/specifications/blob/master/source/sessions/driver-sessions.rst#when-opening-and-authenticating-a-connection
             // Forced on the current connection
-            return self._execute(command: command, session: nil).then { serverReply in
+            return self._execute(command: command, session: nil, transaction: nil).then { serverReply in
                 do {
                     let reply = try SASLReply(reply: serverReply)
                     
@@ -176,7 +179,7 @@ extension Connection {
                         payload: response
                     )
                     
-                    return self._execute(command: next, session: nil).then { serverReply in
+                    return self._execute(command: next, session: nil, transaction: nil).then { serverReply in
                         do {
                             let reply = try SASLReply(reply: serverReply)
                             
@@ -192,7 +195,7 @@ extension Connection {
                                     payload: ""
                                 )
                                 
-                                return self._execute(command: final, session: nil).thenThrowing { serverReply in
+                                return self._execute(command: final, session: nil, transaction: nil).thenThrowing { serverReply in
                                     let reply = try SASLReply(reply: serverReply)
                                     
                                     guard reply.done else {

@@ -64,7 +64,9 @@ extension Collection {
         
         do {
             let document = try BSONEncoder().encode(stage)
-            return self.aggregate().append(document).execute().map(ChangeStream.init)
+            let cursor = self.aggregate().append(document)
+            cursor.maxTimeMS = 25_000
+            return cursor.execute().map(ChangeStream.init)
         } catch {
             return self.eventLoop.newFailedFuture(error: error)
         }
@@ -83,6 +85,7 @@ extension AggregateCursor where Element == Document {
         
         do {
             let document = try BSONEncoder().encode(stage)
+            self.maxTimeMS = 25_000
             self.operation.pipeline.insert(document, at: 0)
             return self.execute().map(ChangeStream.init)
         } catch {
@@ -94,12 +97,13 @@ extension AggregateCursor where Element == Document {
 /// A ChangeStream can be used to watch changes within a collection or database.
 ///
 /// ChangeStream is only available to MongoDB 3.6+ users
-public final class ChangeStream<Notification: Decodable> {
+public struct ChangeStream<Notification: Decodable> {
     /// The aggregate cursor that is secretly being wrapped
     private let cursor: FinalizedCursor<AggregateCursor<Document>>
     
     fileprivate init(cursor: FinalizedCursor<AggregateCursor<Document>>) {
         self.cursor = cursor
+        cursor.cursor.maxTimeMS = 25_000
     }
     
     public func close() -> EventLoopFuture<Void> {
